@@ -5,12 +5,14 @@ using UnityEngine.UIElements;
 
 public class GridPosition : MonoBehaviour, IPointerClickHandler
 {
-    public int x;
-    public int y;
+    [SerializeField]
+    private int x;
+    [SerializeField]
+    private int y;
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        Debug.Log("Clicked on cell " + y + ", " + x);
+        GameManager.Instance.ClickedOnCell(x, y);
     }
 
     public void SetPosition(int x, int y)
