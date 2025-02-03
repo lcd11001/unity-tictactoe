@@ -38,15 +38,12 @@ public class GameVisualManager : NetworkBehaviour
     [Rpc(SendTo.Server)]
     private void SpawnElementRpc(int x, int y)
     {
-        Debug.Log("Server Spawning element at " + x + ", " + y);
+        Debug.Log("Server Spawning element at " + y + ", " + x);
 
         // spawn an element through the network
-        Transform obj = Instantiate(crossPrefab);
+        Transform obj = Instantiate(crossPrefab, GetGridWorldPosition(x, y), Quaternion.identity);
         NetworkObject networkObject = obj.GetComponent<NetworkObject>();
         networkObject.Spawn(true);
-
-        // set the position of the object
-        obj.position = GetGridWorldPosition(x, y);
 
         // set the parent to the network object
         // and keep the local position
