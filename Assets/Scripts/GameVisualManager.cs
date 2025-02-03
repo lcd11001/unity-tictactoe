@@ -3,7 +3,7 @@ using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class GameVisualManager : MonoBehaviour
+public class GameVisualManager : NetworkBehaviour
 {
     [SerializeField]
     private Transform crossPrefab;
@@ -32,13 +32,21 @@ public class GameVisualManager : MonoBehaviour
     {
         Debug.Log("Visual Clicked on cell " + e.Y + ", " + e.X);
 
+        SpawnElementRpc(e.X, e.Y);
+    }
+
+    [Rpc(SendTo.Server)]
+    private void SpawnElementRpc(int x, int y)
+    {
+        Debug.Log("Server Spawning element at " + x + ", " + y);
+
         // spawn an element through the network
         Transform obj = Instantiate(crossPrefab);
         NetworkObject networkObject = obj.GetComponent<NetworkObject>();
         networkObject.Spawn(true);
 
         // set the position of the object
-        obj.position = GetGridWorldPosition(e.X, e.Y);
+        obj.position = GetGridWorldPosition(x, y);
 
         // set the parent to the network object
         // and keep the local position
