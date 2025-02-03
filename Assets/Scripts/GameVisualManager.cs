@@ -1,4 +1,5 @@
 using System;
+using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -10,7 +11,7 @@ public class GameVisualManager : MonoBehaviour
     private Transform circlePrefab;
 
     [SerializeField]
-    Transform parent;
+    NetworkObject parent;
 
     [SerializeField]
     private float startX = 0f;
@@ -30,8 +31,18 @@ public class GameVisualManager : MonoBehaviour
     private void OnCellClicked(object sender, OnCellClickedEventArgs e)
     {
         Debug.Log("Visual Clicked on cell " + e.Y + ", " + e.X);
-        Transform obj = Instantiate(crossPrefab, GetGridWorldPosition(e.X, e.Y), Quaternion.identity);
-        obj.SetParent(parent, false);
+
+        // spawn an element through the network
+        Transform obj = Instantiate(crossPrefab);
+        NetworkObject networkObject = obj.GetComponent<NetworkObject>();
+        networkObject.Spawn(true);
+
+        // set the position of the object
+        obj.position = GetGridWorldPosition(e.X, e.Y);
+
+        // set the parent to the network object
+        // and keep the local position
+        networkObject.transform.SetParent(parent.transform, false);
     }
 
     private Vector3 GetGridWorldPosition(int x, int y)
