@@ -870,8 +870,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 674063032}
-  - component: {fileID: 674063031}
   - component: {fileID: 674063033}
+  - component: {fileID: 674063031}
   m_Layer: 0
   m_Name: Game Manager
   m_TagString: Untagged
@@ -892,6 +892,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
+  localPlayerType: 0
+  currentPlayerType: 0
 --- !u!4 &674063032
 Transform:
   m_ObjectHideFlags: 0

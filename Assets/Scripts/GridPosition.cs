@@ -12,7 +12,7 @@ public class GridPosition : MonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        GameManager.Instance.ClickedOnCell(x, y);
+        GameManager.Instance.ClickedOnCellRpc(x, y, GameManager.Instance.GetLocalPlayerType());
     }
 
     public void SetPosition(int x, int y)

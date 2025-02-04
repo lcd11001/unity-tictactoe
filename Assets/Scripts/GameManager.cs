@@ -1,6 +1,7 @@
 using System;
 using Unity.Netcode;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class GameManager : NetworkBehaviour
 {
@@ -8,7 +9,10 @@ public class GameManager : NetworkBehaviour
 
     public event EventHandler<OnCellClickedEventArgs> OnCellClicked;
 
+    [SerializeField]
     private PlayerType localPlayerType = PlayerType.None;
+    [SerializeField]
+    private NetworkVariable<PlayerType> currentPlayerType = new NetworkVariable<PlayerType>(PlayerType.None);
 
     private void Awake()
     {
@@ -16,6 +20,8 @@ public class GameManager : NetworkBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+
+            Random.InitState(DateTime.Now.Millisecond);
         }
         else
         {
@@ -23,10 +29,42 @@ public class GameManager : NetworkBehaviour
         }
     }
 
-    public void ClickedOnCell(int x, int y)
+    public void SetCurrentPlayerType(PlayerType type)
     {
+        if (IsServer)
+        {
+            currentPlayerType.Value = type;
+        }
+        else
+        {
+            SetCurrentPlayerTypeRpc(type);
+        }
+    }
+
+    public PlayerType GetLocalPlayerType()
+    {
+        return localPlayerType;
+    }
+
+    [Rpc(SendTo.Server)]
+    public void ClickedOnCellRpc(int x, int y, PlayerType type)
+    {
+        if (!NetworkManager.Singleton.IsConnectedClient)
+        {
+            Debug.Log("Not connected to a server");
+            return;
+        }
+
+        if (type != currentPlayerType.Value)
+        {
+            Debug.Log("Your turn " + type + " does not match current player " + currentPlayerType.Value);
+            return;
+        }
+
         Debug.Log("Clicked on cell " + y + ", " + x);
-        OnCellClicked?.Invoke(this, new OnCellClickedEventArgs(x, y, localPlayerType));
+        OnCellClicked?.Invoke(this, new OnCellClickedEventArgs(x, y, type));
+
+        ChangePlayerRpc();
     }
 
     override public void OnNetworkSpawn()
@@ -35,10 +73,56 @@ public class GameManager : NetworkBehaviour
         if (IsServer)
         {
             localPlayerType = PlayerType.Cross;
+
+            SetFirstPlayerRpc();
         }
         else
         {
             localPlayerType = PlayerType.Circle;
         }
+    }
+
+    [Rpc(SendTo.Server)]
+    private void RematchRpc()
+    {
+        Debug.Log("Rematch");
+
+        SetFirstPlayerRpc();
+    }
+
+    [Rpc(SendTo.Server)]
+    private void SetFirstPlayerRpc()
+    {
+        if (Random.Range(0, 2) == 0)
+        {
+            SetCurrentPlayerType(PlayerType.Circle);
+        }
+        else
+        {
+            SetCurrentPlayerType(PlayerType.Cross);
+        }
+    }
+
+    [Rpc(SendTo.Server)]
+    private void ChangePlayerRpc()
+    {
+        switch (currentPlayerType.Value)
+        {
+            case PlayerType.Cross:
+                SetCurrentPlayerType(PlayerType.Circle);
+                break;
+            case PlayerType.Circle:
+                SetCurrentPlayerType(PlayerType.Cross);
+                break;
+            default:
+                Debug.LogError("Invalid player type");
+                break;
+        }
+    }
+
+    [Rpc(SendTo.Server)]
+    private void SetCurrentPlayerTypeRpc(PlayerType type)
+    {
+        currentPlayerType.Value = type;
     }
 }
