@@ -29,18 +29,6 @@ public class GameManager : NetworkBehaviour
         }
     }
 
-    public void SetCurrentPlayerType(PlayerType type)
-    {
-        if (IsServer)
-        {
-            currentPlayerType.Value = type;
-        }
-        else
-        {
-            SetCurrentPlayerTypeRpc(type);
-        }
-    }
-
     public PlayerType GetLocalPlayerType()
     {
         return localPlayerType;
@@ -95,11 +83,11 @@ public class GameManager : NetworkBehaviour
     {
         if (Random.Range(0, 2) == 0)
         {
-            SetCurrentPlayerType(PlayerType.Circle);
+            SetCurrentPlayerTypeRpc(PlayerType.Circle);
         }
         else
         {
-            SetCurrentPlayerType(PlayerType.Cross);
+            SetCurrentPlayerTypeRpc(PlayerType.Cross);
         }
     }
 
@@ -109,10 +97,10 @@ public class GameManager : NetworkBehaviour
         switch (currentPlayerType.Value)
         {
             case PlayerType.Cross:
-                SetCurrentPlayerType(PlayerType.Circle);
+                SetCurrentPlayerTypeRpc(PlayerType.Circle);
                 break;
             case PlayerType.Circle:
-                SetCurrentPlayerType(PlayerType.Cross);
+                SetCurrentPlayerTypeRpc(PlayerType.Cross);
                 break;
             default:
                 Debug.LogError("Invalid player type");
