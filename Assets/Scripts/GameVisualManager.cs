@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class GameVisualManager : NetworkBehaviour
 {
+    public static GameVisualManager Instance { get; private set; }
+
     [SerializeField]
     private Transform crossPrefab;
     [SerializeField]
@@ -22,6 +24,19 @@ public class GameVisualManager : NetworkBehaviour
     private float sizeX = 0f;
     [SerializeField]
     private float sizeY = 0f;
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
 
     void Start()
     {

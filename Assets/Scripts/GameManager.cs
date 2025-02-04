@@ -88,6 +88,10 @@ public class GameManager : NetworkBehaviour
     public override void OnNetworkDespawn()
     {
         Debug.Log("OnNetworkDespawn clientID: " + NetworkManager.Singleton.LocalClientId + " server: " + IsServer);
+        if (IsServer)
+        {
+            NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
+        }
         currentPlayerType.OnValueChanged -= OnCurrentPlayerTypeValueChanged;
     }
 
