@@ -78,7 +78,8 @@ public class GameManager : NetworkBehaviour
         {
             SetFirstPlayerRpc();
 
-            OnGameStarted?.Invoke(this, EventArgs.Empty);
+            TriggerOnGameStartedRpc();
+            TriggerOnCurrentPlayerChangedRpc(currentPlayerType.Value);
         }
     }
 
@@ -126,7 +127,19 @@ public class GameManager : NetworkBehaviour
         if (type != currentPlayerType.Value)
         {
             currentPlayerType.Value = type;
-            OnCurrentPlayerChanged?.Invoke(this, type);
+            TriggerOnCurrentPlayerChangedRpc(type);
         }
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    private void TriggerOnGameStartedRpc()
+    {
+        OnGameStarted?.Invoke(this, EventArgs.Empty);
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    private void TriggerOnCurrentPlayerChangedRpc(PlayerType type)
+    {
+        OnCurrentPlayerChanged?.Invoke(this, type);
     }
 }
