@@ -20,6 +20,10 @@ public class HudUI : MonoBehaviour
 
         circleArrow.SetActive(false);
         circleText.SetActive(false);
+
+        // Fixed: event OnGameStarted was invoked in Main scene, before being subscribed in Game scene
+        OnGameStarted(this, EventArgs.Empty);
+        OnCurrentPlayerChanged(this, EventArgs.Empty);
     }
 
     void Start()
@@ -51,9 +55,11 @@ public class HudUI : MonoBehaviour
         {
             case PlayerType.Cross:
                 crossText.SetActive(true);
+                circleText.SetActive(false);
                 break;
             case PlayerType.Circle:
                 circleText.SetActive(true);
+                crossText.SetActive(false);
                 break;
         }
     }

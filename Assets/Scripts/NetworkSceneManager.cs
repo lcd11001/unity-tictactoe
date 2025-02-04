@@ -47,11 +47,11 @@ public class NetworkSceneManager : NetworkBehaviour
         // Wait for both players before starting
         if (NetworkManager.Singleton.ConnectedClientsList.Count == 2)
         {
-            LoadGameScene();
+            LoadNetworkGameScene();
         }
     }
 
-    private void LoadGameScene()
+    private void LoadNetworkGameScene()
     {
         var status = NetworkManager.Singleton.SceneManager.LoadScene(GAME_SCENE, LoadSceneMode.Single);
         if (status != SceneEventProgressStatus.Started)
