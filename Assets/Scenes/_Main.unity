@@ -2789,6 +2789,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1923494265}
+  - component: {fileID: 1923494266}
   m_Layer: 5
   m_Name: HUD
   m_TagString: Untagged
@@ -2822,6 +2823,22 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1923494266
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1923494264}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02c0dc6d46968a24797270f92c50c055, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  crossArrow: {fileID: 840053567}
+  crossText: {fileID: 1057622629}
+  circleArrow: {fileID: 524801578}
+  circleText: {fileID: 1889360509}
 --- !u!1001 &1967451509
 PrefabInstance:
   m_ObjectHideFlags: 0

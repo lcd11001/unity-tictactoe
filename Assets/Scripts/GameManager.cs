@@ -8,6 +8,8 @@ public class GameManager : NetworkBehaviour
     public static GameManager Instance { get; private set; }
 
     public event EventHandler<OnCellClickedEventArgs> OnCellClicked;
+    public event EventHandler OnGameStarted;
+    public event EventHandler<PlayerType> OnCurrentPlayerChanged;
 
     [SerializeField]
     private PlayerType localPlayerType = PlayerType.None;
@@ -62,11 +64,21 @@ public class GameManager : NetworkBehaviour
         {
             localPlayerType = PlayerType.Cross;
 
-            SetFirstPlayerRpc();
+            NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
         }
         else
         {
             localPlayerType = PlayerType.Circle;
+        }
+    }
+
+    private void OnClientConnected(ulong id)
+    {
+        if (NetworkManager.Singleton.ConnectedClientsList.Count == 2)
+        {
+            SetFirstPlayerRpc();
+
+            OnGameStarted?.Invoke(this, EventArgs.Empty);
         }
     }
 
@@ -111,6 +123,10 @@ public class GameManager : NetworkBehaviour
     [Rpc(SendTo.Server)]
     private void SetCurrentPlayerTypeRpc(PlayerType type)
     {
-        currentPlayerType.Value = type;
+        if (type != currentPlayerType.Value)
+        {
+            currentPlayerType.Value = type;
+            OnCurrentPlayerChanged?.Invoke(this, type);
+        }
     }
 }
