@@ -32,16 +32,16 @@ public class GameVisualManager : NetworkBehaviour
     {
         Debug.Log("Visual Clicked on cell " + e.Y + ", " + e.X);
 
-        SpawnElementRpc(e.X, e.Y);
+        SpawnElementRpc(e.X, e.Y, e.Type);
     }
 
     [Rpc(SendTo.Server)]
-    private void SpawnElementRpc(int x, int y)
+    private void SpawnElementRpc(int x, int y, PlayerType type)
     {
         Debug.Log("Server Spawning element at " + y + ", " + x);
 
         // spawn an element through the network
-        Transform obj = Instantiate(crossPrefab, GetGridWorldPosition(x, y), Quaternion.identity);
+        Transform obj = Instantiate(type == PlayerType.Cross ? crossPrefab : circlePrefab, GetGridWorldPosition(x, y), Quaternion.identity);
         NetworkObject networkObject = obj.GetComponent<NetworkObject>();
         networkObject.Spawn(true);
 
