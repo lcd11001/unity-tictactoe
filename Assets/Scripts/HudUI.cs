@@ -28,8 +28,10 @@ public class HudUI : MonoBehaviour
         GameManager.Instance.OnCurrentPlayerChanged += OnCurrentPlayerChanged;
     }
 
-    private void OnCurrentPlayerChanged(object sender, PlayerType type)
+    private void OnCurrentPlayerChanged(object sender, EventArgs e)
     {
+        PlayerType type = GameManager.Instance.GetCurrentPlayerType();
+        Debug.Log("Current player changed to " + type);
         switch (type)
         {
             case PlayerType.Cross:

@@ -9,12 +9,12 @@ public class GameManager : NetworkBehaviour
 
     public event EventHandler<OnCellClickedEventArgs> OnCellClicked;
     public event EventHandler OnGameStarted;
-    public event EventHandler<PlayerType> OnCurrentPlayerChanged;
+    public event EventHandler OnCurrentPlayerChanged;
 
     [SerializeField]
     private PlayerType localPlayerType = PlayerType.None;
     [SerializeField]
-    private NetworkVariable<PlayerType> currentPlayerType = new NetworkVariable<PlayerType>(PlayerType.None);
+    private NetworkVariable<PlayerType> currentPlayerType = new NetworkVariable<PlayerType>(PlayerType.None, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     private void Awake()
     {
@@ -31,9 +31,19 @@ public class GameManager : NetworkBehaviour
         }
     }
 
+    private void OnCurrentPlayerTypeValueChanged(PlayerType previousValue, PlayerType newValue)
+    {
+        OnCurrentPlayerChanged?.Invoke(this, EventArgs.Empty);
+    }
+
     public PlayerType GetLocalPlayerType()
     {
         return localPlayerType;
+    }
+
+    public PlayerType GetCurrentPlayerType()
+    {
+        return currentPlayerType.Value;
     }
 
     [Rpc(SendTo.Server)]
@@ -45,9 +55,9 @@ public class GameManager : NetworkBehaviour
             return;
         }
 
-        if (type != currentPlayerType.Value)
+        if (type != GetCurrentPlayerType())
         {
-            Debug.Log("Your turn " + type + " does not match current player " + currentPlayerType.Value);
+            Debug.Log("Your turn " + type + " does not match current player " + GetCurrentPlayerType());
             return;
         }
 
@@ -70,6 +80,15 @@ public class GameManager : NetworkBehaviour
         {
             localPlayerType = PlayerType.Circle;
         }
+
+        // register to the event for both server and client
+        currentPlayerType.OnValueChanged += OnCurrentPlayerTypeValueChanged;
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        Debug.Log("OnNetworkDespawn clientID: " + NetworkManager.Singleton.LocalClientId + " server: " + IsServer);
+        currentPlayerType.OnValueChanged -= OnCurrentPlayerTypeValueChanged;
     }
 
     private void OnClientConnected(ulong id)
@@ -79,7 +98,6 @@ public class GameManager : NetworkBehaviour
             SetFirstPlayerRpc();
 
             TriggerOnGameStartedRpc();
-            TriggerOnCurrentPlayerChangedRpc(currentPlayerType.Value);
         }
     }
 
@@ -107,7 +125,7 @@ public class GameManager : NetworkBehaviour
     [Rpc(SendTo.Server)]
     private void ChangePlayerRpc()
     {
-        switch (currentPlayerType.Value)
+        switch (GetCurrentPlayerType())
         {
             case PlayerType.Cross:
                 SetCurrentPlayerTypeRpc(PlayerType.Circle);
@@ -124,10 +142,9 @@ public class GameManager : NetworkBehaviour
     [Rpc(SendTo.Server)]
     private void SetCurrentPlayerTypeRpc(PlayerType type)
     {
-        if (type != currentPlayerType.Value)
+        if (type != GetCurrentPlayerType())
         {
             currentPlayerType.Value = type;
-            TriggerOnCurrentPlayerChangedRpc(type);
         }
     }
 
@@ -135,11 +152,5 @@ public class GameManager : NetworkBehaviour
     private void TriggerOnGameStartedRpc()
     {
         OnGameStarted?.Invoke(this, EventArgs.Empty);
-    }
-
-    [Rpc(SendTo.ClientsAndHost)]
-    private void TriggerOnCurrentPlayerChangedRpc(PlayerType type)
-    {
-        OnCurrentPlayerChanged?.Invoke(this, type);
     }
 }
