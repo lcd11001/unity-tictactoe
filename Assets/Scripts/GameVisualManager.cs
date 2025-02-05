@@ -1,6 +1,4 @@
-using System;
 using Unity.Netcode;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class GameVisualManager : NetworkBehaviour
@@ -26,6 +24,12 @@ public class GameVisualManager : NetworkBehaviour
     void Start()
     {
         GameManager.Instance.OnCellClicked += OnCellClicked;
+    }
+
+    public override void OnDestroy()
+    {
+        GameManager.Instance.OnCellClicked -= OnCellClicked;
+        base.OnDestroy();
     }
 
     private void OnCellClicked(object sender, OnCellClickedEventArgs e)

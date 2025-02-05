@@ -1,5 +1,4 @@
 using System;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class HudUI : MonoBehaviour
@@ -30,6 +29,12 @@ public class HudUI : MonoBehaviour
     {
         GameManager.Instance.OnGameStarted += OnGameStarted;
         GameManager.Instance.OnCurrentPlayerChanged += OnCurrentPlayerChanged;
+    }
+
+    private void OnDestroy()
+    {
+        GameManager.Instance.OnGameStarted -= OnGameStarted;
+        GameManager.Instance.OnCurrentPlayerChanged -= OnCurrentPlayerChanged;
     }
 
     private void OnCurrentPlayerChanged(object sender, EventArgs e)

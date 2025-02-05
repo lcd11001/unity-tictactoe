@@ -93,6 +93,8 @@ public class GameManager : NetworkBehaviour
             NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
         }
         currentPlayerType.OnValueChanged -= OnCurrentPlayerTypeValueChanged;
+
+        base.OnNetworkDespawn();
     }
 
     private void OnClientConnected(ulong id)
