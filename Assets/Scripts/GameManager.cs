@@ -16,6 +16,7 @@ public class GameManager : NetworkBehaviour
     [SerializeField]
     private NetworkVariable<PlayerType> currentPlayerType = new NetworkVariable<PlayerType>(PlayerType.None, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
+    private BoardGame boardGame;
     private void Awake()
     {
         if (Instance == null)
@@ -24,6 +25,8 @@ public class GameManager : NetworkBehaviour
             DontDestroyOnLoad(gameObject);
 
             Random.InitState(DateTime.Now.Millisecond);
+
+            boardGame = new BoardGame(3);
         }
         else
         {
@@ -61,7 +64,14 @@ public class GameManager : NetworkBehaviour
             return;
         }
 
+        if (!boardGame.IsCellValid(x, y) || !boardGame.IsCellEmpty(x, y))
+        {
+            Debug.Log("Invalid cell " + y + ", " + x);
+            return;
+        }
+
         Debug.Log("Clicked on cell " + y + ", " + x);
+        boardGame.SetCell(x, y, type);
         OnCellClicked?.Invoke(this, new OnCellClickedEventArgs(x, y, type));
 
         ChangePlayerRpc();
