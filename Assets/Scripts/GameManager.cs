@@ -10,6 +10,7 @@ public class GameManager : NetworkBehaviour
     public event EventHandler<OnCellClickedEventArgs> OnCellClicked;
     public event EventHandler OnGameStarted;
     public event EventHandler OnCurrentPlayerChanged;
+    public event EventHandler<OnGameWinnerArgs> OnGameWinner;
 
     [SerializeField]
     private PlayerType localPlayerType = PlayerType.None;
@@ -79,6 +80,7 @@ public class GameManager : NetworkBehaviour
         {
             SetCurrentPlayerTypeRpc(PlayerType.None);
             Debug.Log("Winner " + type);
+            OnGameWinner?.Invoke(this, new OnGameWinnerArgs(type, boardGame.WinnerStart, boardGame.WinnerEnd));
         }
         else
         {

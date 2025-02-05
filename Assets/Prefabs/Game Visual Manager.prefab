@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 850558690
+  GlobalObjectIdHash: 3277752579
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -73,6 +73,7 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   crossPrefab: {fileID: 1202366023609296407, guid: bc6dc47c40fe61e4d9740eb0d0ae7830, type: 3}
   circlePrefab: {fileID: 987526918395012568, guid: 57392a1e317c07f43a8ac07e35b4aa06, type: 3}
+  winnerPrefab: {fileID: 2858037313538477578, guid: 972ecd038b816ae49ac97317dadce558, type: 3}
   parent: {fileID: 0}
   startX: -310
   startY: -310

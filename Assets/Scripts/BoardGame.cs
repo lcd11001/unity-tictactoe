@@ -1,7 +1,15 @@
+using UnityEngine;
+
 public class BoardGame
 {
     private PlayerType[,] board;
     private int size;
+    private Vector2Int winnerStart;
+    private Vector2Int winnerEnd;
+
+    public Vector2Int WinnerStart => winnerStart;
+    public Vector2Int WinnerEnd => winnerEnd;
+
 
     public BoardGame(int size)
     {
@@ -19,6 +27,9 @@ public class BoardGame
                 board[i, j] = PlayerType.None;
             }
         }
+
+        winnerStart = new Vector2Int(-1, -1);
+        winnerEnd = new Vector2Int(-1, -1);
     }
 
     public bool IsCellEmpty(int x, int y)
@@ -92,6 +103,8 @@ public class BoardGame
 
             if (rowWin)
             {
+                winnerStart = new Vector2Int(i, 0);
+                winnerEnd = new Vector2Int(i, size - 1);
                 return true;
             }
         }
@@ -113,6 +126,8 @@ public class BoardGame
             }
             if (columnWin)
             {
+                winnerStart = new Vector2Int(0, i);
+                winnerEnd = new Vector2Int(size - 1, i);
                 return true;
             }
         }
@@ -128,6 +143,8 @@ public class BoardGame
                 return false;
             }
         }
+        winnerStart = new Vector2Int(0, 0);
+        winnerEnd = new Vector2Int(size - 1, size - 1);
         return true;
     }
 
@@ -140,6 +157,8 @@ public class BoardGame
                 return false;
             }
         }
+        winnerStart = new Vector2Int(0, size - 1);
+        winnerEnd = new Vector2Int(size - 1, 0);
         return true;
     }
 }

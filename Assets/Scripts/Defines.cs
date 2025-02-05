@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 public class OnCellClickedEventArgs : EventArgs
 {
@@ -20,4 +21,17 @@ public enum PlayerType
     None,
     Cross,
     Circle
+}
+
+public class OnGameWinnerArgs : EventArgs
+{
+    public PlayerType Winner { get; private set; }
+    public Vector2Int StartPosition { get; private set; }
+    public Vector2Int EndPosition { get; private set; }
+    public OnGameWinnerArgs(PlayerType winner, Vector2Int startPost, Vector2Int endPosition)
+    {
+        Winner = winner;
+        StartPosition = startPost;
+        EndPosition = endPosition;
+    }
 }
