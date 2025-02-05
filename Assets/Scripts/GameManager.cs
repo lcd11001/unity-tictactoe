@@ -74,7 +74,16 @@ public class GameManager : NetworkBehaviour
         boardGame.SetCell(x, y, type);
         OnCellClicked?.Invoke(this, new OnCellClickedEventArgs(x, y, type));
 
-        ChangePlayerRpc();
+
+        if (boardGame.IsWinner(type))
+        {
+            SetCurrentPlayerTypeRpc(PlayerType.None);
+            Debug.Log("Winner " + type);
+        }
+        else
+        {
+            ChangePlayerRpc();
+        }
     }
 
     override public void OnNetworkSpawn()

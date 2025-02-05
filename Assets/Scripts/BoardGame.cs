@@ -7,6 +7,7 @@ public class BoardGame
     {
         this.size = size;
         board = new PlayerType[size, size];
+        this.Reset();
     }
 
     public void Reset()
@@ -48,27 +49,21 @@ public class BoardGame
     public bool IsWinner(PlayerType playerType)
     {
         // check rows
-        for (int i = 0; i < size; i++)
-        {
-            if (board[i, 0] == playerType && board[i, 1] == playerType && board[i, 2] == playerType)
-            {
-                return true;
-            }
-        }
-        // check columns
-        for (int i = 0; i < size; i++)
-        {
-            if (board[0, i] == playerType && board[1, i] == playerType && board[2, i] == playerType)
-            {
-                return true;
-            }
-        }
-        // check diagonals
-        if (board[0, 0] == playerType && board[1, 1] == playerType && board[2, 2] == playerType)
+        if (CheckRows(playerType))
         {
             return true;
         }
-        if (board[0, 2] == playerType && board[1, 1] == playerType && board[2, 0] == playerType)
+        // check columns
+        if (CheckColumns(playerType))
+        {
+            return true;
+        }
+        // check diagonals
+        if (CheckDiagonal1(playerType))
+        {
+            return true;
+        }
+        if (CheckDiagonal2(playerType))
         {
             return true;
         }
@@ -78,5 +73,73 @@ public class BoardGame
     public void SetCell(int x, int y, PlayerType playerType)
     {
         board[x, y] = playerType;
+    }
+
+    private bool CheckRows(PlayerType playerType)
+    {
+        for (int i = 0; i < size; i++)
+        {
+            bool rowWin = true;
+
+            for (int j = 0; j < size; j++)
+            {
+                if (board[i, j] != playerType)
+                {
+                    rowWin = false;
+                    break;
+                }
+            }
+
+            if (rowWin)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private bool CheckColumns(PlayerType playerType)
+    {
+        for (int i = 0; i < size; i++)
+        {
+            bool columnWin = true;
+            for (int j = 0; j < size; j++)
+            {
+                if (board[j, i] != playerType)
+                {
+                    columnWin = false;
+                    break;
+                }
+            }
+            if (columnWin)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private bool CheckDiagonal1(PlayerType playerType)
+    {
+        for (int i = 0; i < size; i++)
+        {
+            if (board[i, i] != playerType)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private bool CheckDiagonal2(PlayerType playerType)
+    {
+        for (int i = 0; i < size; i++)
+        {
+            if (board[i, size - i - 1] != playerType)
+            {
+                return false;
+            }
+        }
+        return true;
     }
 }
