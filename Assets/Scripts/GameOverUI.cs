@@ -9,6 +9,8 @@ public class GameOverUI : MonoBehaviour
     [SerializeField]
     private GameObject youLose;
     [SerializeField]
+    private GameObject youDraw;
+    [SerializeField]
     private Button rematchButton;
 
     void Awake()
@@ -21,12 +23,14 @@ public class GameOverUI : MonoBehaviour
     {
         GameManager.Instance.OnGameWinner += OnGameEnded;
         GameManager.Instance.OnGameRematch += OnGameRematch;
+        GameManager.Instance.OnGameDraw += OnGameDraw;
     }
 
     private void OnDestroy()
     {
         GameManager.Instance.OnGameWinner -= OnGameEnded;
         GameManager.Instance.OnGameRematch -= OnGameRematch;
+        GameManager.Instance.OnGameDraw -= OnGameDraw;
         rematchButton.onClick.RemoveListener(OnRematch);
     }
 
@@ -34,6 +38,7 @@ public class GameOverUI : MonoBehaviour
     {
         youWin.SetActive(false);
         youLose.SetActive(false);
+        youDraw.SetActive(false);
         rematchButton.gameObject.SetActive(false);
     }
 
@@ -47,6 +52,12 @@ public class GameOverUI : MonoBehaviour
         {
             youLose.SetActive(true);
         }
+        rematchButton.gameObject.SetActive(true);
+    }
+
+    private void OnGameDraw(object sender, EventArgs e)
+    {
+        youDraw.SetActive(true);
         rematchButton.gameObject.SetActive(true);
     }
 

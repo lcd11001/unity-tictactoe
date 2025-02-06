@@ -12,6 +12,7 @@ public class GameManager : NetworkBehaviour
     public event EventHandler OnCurrentPlayerChanged;
     public event EventHandler<OnGameWinnerArgs> OnGameWinner;
     public event EventHandler OnGameRematch;
+    public event EventHandler OnGameDraw;
 
     [SerializeField]
     private PlayerType localPlayerType = PlayerType.None;
@@ -76,8 +77,13 @@ public class GameManager : NetworkBehaviour
         boardGame.SetCell(x, y, type);
         OnCellClicked?.Invoke(this, new OnCellClickedEventArgs(x, y, type));
 
-
-        if (boardGame.IsWinner(type))
+        if (boardGame.IsBoardFull())
+        {
+            SetCurrentPlayerTypeRpc(PlayerType.None);
+            Debug.Log("Draw");
+            TriggerOnGameDrawRpc();
+        }
+        else if (boardGame.IsWinner(type))
         {
             SetCurrentPlayerTypeRpc(PlayerType.None);
             Debug.Log("Winner " + type);
@@ -189,6 +195,12 @@ public class GameManager : NetworkBehaviour
     private void TriggerOnGameWinnerRpc(PlayerType type, Vector2Int start, Vector2Int end, float angle)
     {
         OnGameWinner?.Invoke(this, new OnGameWinnerArgs(type, start, end, angle));
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    private void TriggerOnGameDrawRpc()
+    {
+        OnGameDraw?.Invoke(this, EventArgs.Empty);
     }
 
     [Rpc(SendTo.ClientsAndHost)]
