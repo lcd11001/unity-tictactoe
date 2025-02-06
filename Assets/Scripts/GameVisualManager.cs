@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -23,17 +25,41 @@ public class GameVisualManager : NetworkBehaviour
     [SerializeField]
     private float sizeY = 0f;
 
+    private List<GameObject> elements = new List<GameObject>();
+
     void Start()
     {
         GameManager.Instance.OnCellClicked += OnCellClicked;
         GameManager.Instance.OnGameWinner += OnGameWinner;
+        GameManager.Instance.OnGameRematch += OnGameRematch;
     }
 
     public override void OnDestroy()
     {
         GameManager.Instance.OnCellClicked -= OnCellClicked;
         GameManager.Instance.OnGameWinner -= OnGameWinner;
+        GameManager.Instance.OnGameRematch -= OnGameRematch;
         base.OnDestroy();
+    }
+
+    private void OnGameRematch(object sender, EventArgs e)
+    {
+        ResetUI();
+    }
+
+    private void ResetUI()
+    {
+        if (!NetworkManager.Singleton.IsServer)
+        {
+            return;
+        }
+
+        Debug.Log("Reset elements");
+        foreach (var child in elements)
+        {
+            Destroy(child);
+        }
+        elements.Clear();
     }
 
     private void OnCellClicked(object sender, OnCellClickedEventArgs e)
@@ -67,6 +93,8 @@ public class GameVisualManager : NetworkBehaviour
         NetworkObject networkObject = obj.GetComponent<NetworkObject>();
         networkObject.Spawn(true);
 
+        elements.Add(obj.gameObject);
+
         // set the parent to the network object
         // and keep the local position
         networkObject.transform.SetParent(parent.transform, false);
@@ -80,6 +108,8 @@ public class GameVisualManager : NetworkBehaviour
         Transform obj = Instantiate(winnerPrefab, GetGridWorldPosition(x, y), Quaternion.Euler(0, 0, angle));
         NetworkObject networkObject = obj.GetComponent<NetworkObject>();
         networkObject.Spawn(true);
+
+        elements.Add(obj.gameObject);
 
         // set the parent to the network object
         // and keep the local position

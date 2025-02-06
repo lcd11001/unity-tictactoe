@@ -11,6 +11,7 @@ public class GameManager : NetworkBehaviour
     public event EventHandler OnGameStarted;
     public event EventHandler OnCurrentPlayerChanged;
     public event EventHandler<OnGameWinnerArgs> OnGameWinner;
+    public event EventHandler OnGameRematch;
 
     [SerializeField]
     private PlayerType localPlayerType = PlayerType.None;
@@ -130,11 +131,13 @@ public class GameManager : NetworkBehaviour
     }
 
     [Rpc(SendTo.Server)]
-    private void RematchRpc()
+    public void RematchRpc()
     {
         Debug.Log("Rematch");
-
+        boardGame.Reset();
         SetFirstPlayerRpc();
+
+        TriggerOnGameRematchRpc();
     }
 
     [Rpc(SendTo.Server)]
@@ -186,5 +189,11 @@ public class GameManager : NetworkBehaviour
     private void TriggerOnGameWinnerRpc(PlayerType type, Vector2Int start, Vector2Int end, float angle)
     {
         OnGameWinner?.Invoke(this, new OnGameWinnerArgs(type, start, end, angle));
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    private void TriggerOnGameRematchRpc()
+    {
+        OnGameRematch?.Invoke(this, EventArgs.Empty);
     }
 }
