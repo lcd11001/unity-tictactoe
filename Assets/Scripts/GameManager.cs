@@ -81,7 +81,7 @@ public class GameManager : NetworkBehaviour
             SetCurrentPlayerTypeRpc(PlayerType.None);
             Debug.Log("Winner " + type);
             //OnGameWinner?.Invoke(this, new OnGameWinnerArgs(type, boardGame.WinnerStart, boardGame.WinnerEnd));
-            TriggerOnGameWinnerRpc(type, boardGame.WinnerStart, boardGame.WinnerEnd);
+            TriggerOnGameWinnerRpc(type, boardGame.WinnerStart, boardGame.WinnerEnd, boardGame.WinnerAngle);
         }
         else
         {
@@ -183,8 +183,8 @@ public class GameManager : NetworkBehaviour
     }
 
     [Rpc(SendTo.ClientsAndHost)]
-    private void TriggerOnGameWinnerRpc(PlayerType type, Vector2Int start, Vector2Int end)
+    private void TriggerOnGameWinnerRpc(PlayerType type, Vector2Int start, Vector2Int end, float angle)
     {
-        OnGameWinner?.Invoke(this, new OnGameWinnerArgs(type, start, end));
+        OnGameWinner?.Invoke(this, new OnGameWinnerArgs(type, start, end, angle));
     }
 }

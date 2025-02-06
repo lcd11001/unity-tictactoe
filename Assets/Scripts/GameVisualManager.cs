@@ -45,13 +45,16 @@ public class GameVisualManager : NetworkBehaviour
 
     private void OnGameWinner(object sender, OnGameWinnerArgs e)
     {
+        if (!NetworkManager.Singleton.IsServer)
+        {
+            return;
+        }
         Debug.Log("Visual Game winner is " + e.Winner);
         Debug.Log("Visual Winner start position is " + e.StartPosition.y + ":" + e.StartPosition.y);
         Debug.Log("Visual Winner end position is " + e.EndPosition.y + ":" + e.EndPosition.x);
 
         Vector2Int center = new Vector2Int((e.StartPosition.x + e.EndPosition.x) / 2, (e.StartPosition.y + e.EndPosition.y) / 2);
-        float angle = Mathf.Atan2(e.EndPosition.y - e.StartPosition.y, e.EndPosition.x - e.StartPosition.x) * Mathf.Rad2Deg;
-        SpawnWinnerLineRpc(center.x, center.y, angle);
+        SpawnWinnerLineRpc(center.x, center.y, e.Angle);
     }
 
     [Rpc(SendTo.Server)]

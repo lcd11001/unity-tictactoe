@@ -6,10 +6,11 @@ public class BoardGame
     private int size;
     private Vector2Int winnerStart;
     private Vector2Int winnerEnd;
+    private float winnerAngle;
 
     public Vector2Int WinnerStart => winnerStart;
     public Vector2Int WinnerEnd => winnerEnd;
-
+    public float WinnerAngle => winnerAngle;
 
     public BoardGame(int size)
     {
@@ -30,6 +31,7 @@ public class BoardGame
 
         winnerStart = new Vector2Int(-1, -1);
         winnerEnd = new Vector2Int(-1, -1);
+        winnerAngle = 0;
     }
 
     public bool IsCellEmpty(int x, int y)
@@ -105,6 +107,7 @@ public class BoardGame
             {
                 winnerStart = new Vector2Int(i, 0);
                 winnerEnd = new Vector2Int(i, size - 1);
+                winnerAngle = Mathf.Atan2(size - 1, 0) * Mathf.Rad2Deg;
                 return true;
             }
         }
@@ -128,6 +131,7 @@ public class BoardGame
             {
                 winnerStart = new Vector2Int(0, i);
                 winnerEnd = new Vector2Int(size - 1, i);
+                winnerAngle = Mathf.Atan2(0, size - 1) * Mathf.Rad2Deg;
                 return true;
             }
         }
@@ -145,6 +149,7 @@ public class BoardGame
         }
         winnerStart = new Vector2Int(0, 0);
         winnerEnd = new Vector2Int(size - 1, size - 1);
+        winnerAngle = Mathf.Atan2(size - 1, size - 1) * Mathf.Rad2Deg;
         return true;
     }
 
@@ -159,6 +164,7 @@ public class BoardGame
         }
         winnerStart = new Vector2Int(0, size - 1);
         winnerEnd = new Vector2Int(size - 1, 0);
+        winnerAngle = Mathf.Atan2(size - 1, 1 - size) * Mathf.Rad2Deg;
         return true;
     }
 }

@@ -28,10 +28,12 @@ public class OnGameWinnerArgs : EventArgs
     public PlayerType Winner { get; private set; }
     public Vector2Int StartPosition { get; private set; }
     public Vector2Int EndPosition { get; private set; }
-    public OnGameWinnerArgs(PlayerType winner, Vector2Int startPost, Vector2Int endPosition)
+    public float Angle { get; private set; }
+    public OnGameWinnerArgs(PlayerType winner, Vector2Int startPost, Vector2Int endPosition, float angle)
     {
         Winner = winner;
         StartPosition = startPost;
         EndPosition = endPosition;
+        Angle = angle;
     }
 }
