@@ -15,7 +15,7 @@ public class GameOverUI : MonoBehaviour
 
     void Awake()
     {
-        rematchButton.onClick.AddListener(OnRematch);
+        rematchButton.onClick.AddListener(OnRematchClicked);
         Hide();
     }
 
@@ -31,7 +31,7 @@ public class GameOverUI : MonoBehaviour
         GameManager.Instance.OnGameWinner -= OnGameEnded;
         GameManager.Instance.OnGameRematch -= OnGameRematch;
         GameManager.Instance.OnGameDraw -= OnGameDraw;
-        rematchButton.onClick.RemoveListener(OnRematch);
+        rematchButton.onClick.RemoveListener(OnRematchClicked);
     }
 
     public void Hide()
@@ -66,7 +66,7 @@ public class GameOverUI : MonoBehaviour
         Hide();
     }
 
-    private void OnRematch()
+    private void OnRematchClicked()
     {
         GameManager.Instance.RematchRpc();
     }
