@@ -1,4 +1,5 @@
 using System;
+using TMPro;
 using UnityEngine;
 
 public class HudUI : MonoBehaviour
@@ -12,6 +13,11 @@ public class HudUI : MonoBehaviour
     [SerializeField]
     private GameObject circleText;
 
+    [SerializeField]
+    private TMP_Text crossScore;
+    [SerializeField]
+    private TMP_Text circleScore;
+
     void Awake()
     {
         crossArrow.SetActive(false);
@@ -23,18 +29,28 @@ public class HudUI : MonoBehaviour
         // Fixed: event OnGameStarted was invoked in Main scene, before being subscribed in Game scene
         OnGameStarted(this, EventArgs.Empty);
         OnCurrentPlayerChanged(this, EventArgs.Empty);
+        OnPlayerScoreChanged(this, EventArgs.Empty);
     }
 
     void Start()
     {
         GameManager.Instance.OnGameStarted += OnGameStarted;
         GameManager.Instance.OnCurrentPlayerChanged += OnCurrentPlayerChanged;
+        GameManager.Instance.OnPlayerScoreChanged += OnPlayerScoreChanged;
     }
+
 
     private void OnDestroy()
     {
         GameManager.Instance.OnGameStarted -= OnGameStarted;
         GameManager.Instance.OnCurrentPlayerChanged -= OnCurrentPlayerChanged;
+        GameManager.Instance.OnPlayerScoreChanged -= OnPlayerScoreChanged;
+    }
+
+    private void OnPlayerScoreChanged(object sender, EventArgs e)
+    {
+        crossScore.text = GameManager.Instance.GetPlayerScore(PlayerType.Cross).ToString();
+        circleScore.text = GameManager.Instance.GetPlayerScore(PlayerType.Circle).ToString();
     }
 
     private void OnCurrentPlayerChanged(object sender, EventArgs e)

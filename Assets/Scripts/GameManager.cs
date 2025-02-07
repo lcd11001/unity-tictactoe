@@ -13,11 +13,17 @@ public class GameManager : NetworkBehaviour
     public event EventHandler<OnGameWinnerArgs> OnGameWinner;
     public event EventHandler OnGameRematch;
     public event EventHandler OnGameDraw;
+    public event EventHandler OnPlayerScoreChanged;
 
     [SerializeField]
     private PlayerType localPlayerType = PlayerType.None;
     [SerializeField]
     private NetworkVariable<PlayerType> currentPlayerType = new NetworkVariable<PlayerType>(PlayerType.None, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
+    [SerializeField]
+    private NetworkVariable<int> playerCrossScore = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    [SerializeField]
+    private NetworkVariable<int> playerCircleScore = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     private BoardGame boardGame;
     private void Awake()
@@ -42,6 +48,12 @@ public class GameManager : NetworkBehaviour
         OnCurrentPlayerChanged?.Invoke(this, EventArgs.Empty);
     }
 
+    private void OnPlayerScoreValueChanged(int previousValue, int newValue)
+    {
+        Debug.Log("Player Cross: " + playerCrossScore.Value + " Player Circle: " + playerCircleScore.Value);
+        OnPlayerScoreChanged?.Invoke(this, EventArgs.Empty);
+    }
+
     public PlayerType GetLocalPlayerType()
     {
         return localPlayerType;
@@ -50,6 +62,19 @@ public class GameManager : NetworkBehaviour
     public PlayerType GetCurrentPlayerType()
     {
         return currentPlayerType.Value;
+    }
+
+    public int GetPlayerScore(PlayerType type)
+    {
+        switch (type)
+        {
+            case PlayerType.Cross:
+                return playerCrossScore.Value;
+            case PlayerType.Circle:
+                return playerCircleScore.Value;
+            default:
+                return 0;
+        }
     }
 
     [Rpc(SendTo.Server)]
@@ -86,6 +111,7 @@ public class GameManager : NetworkBehaviour
         else if (boardGame.IsWinner(type))
         {
             SetCurrentPlayerTypeRpc(PlayerType.None);
+            SetScore(type);
             Debug.Log("Winner " + type);
             //OnGameWinner?.Invoke(this, new OnGameWinnerArgs(type, boardGame.WinnerStart, boardGame.WinnerEnd));
             TriggerOnGameWinnerRpc(type, boardGame.WinnerStart, boardGame.WinnerEnd, boardGame.WinnerAngle);
@@ -93,6 +119,19 @@ public class GameManager : NetworkBehaviour
         else
         {
             ChangePlayerRpc();
+        }
+    }
+
+    private void SetScore(PlayerType type)
+    {
+        switch (type)
+        {
+            case PlayerType.Cross:
+                playerCrossScore.Value++;
+                break;
+            case PlayerType.Circle:
+                playerCircleScore.Value++;
+                break;
         }
     }
 
@@ -110,8 +149,13 @@ public class GameManager : NetworkBehaviour
             localPlayerType = PlayerType.Circle;
         }
 
+        playerCrossScore.Value = 0;
+        playerCircleScore.Value = 0;
+
         // register to the event for both server and client
         currentPlayerType.OnValueChanged += OnCurrentPlayerTypeValueChanged;
+        playerCircleScore.OnValueChanged += OnPlayerScoreValueChanged;
+        playerCrossScore.OnValueChanged += OnPlayerScoreValueChanged;
     }
 
     public override void OnNetworkDespawn()
@@ -122,6 +166,8 @@ public class GameManager : NetworkBehaviour
             NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
         }
         currentPlayerType.OnValueChanged -= OnCurrentPlayerTypeValueChanged;
+        playerCircleScore.OnValueChanged -= OnPlayerScoreValueChanged;
+        playerCrossScore.OnValueChanged -= OnPlayerScoreValueChanged;
 
         base.OnNetworkDespawn();
     }
