@@ -14,6 +14,7 @@ public class GameManager : NetworkBehaviour
     public event EventHandler OnGameRematch;
     public event EventHandler OnGameDraw;
     public event EventHandler OnPlayerScoreChanged;
+    public event EventHandler<OnGameSoundArgs> OnGameSound;
 
     [SerializeField]
     private PlayerType localPlayerType = PlayerType.None;
@@ -78,8 +79,11 @@ public class GameManager : NetworkBehaviour
     }
 
     [Rpc(SendTo.Server)]
-    public void ClickedOnCellRpc(int x, int y, PlayerType type)
+    public void ClickedOnCellRpc(int x, int y, PlayerType type, RpcParams rpcParams = default)
     {
+        ulong clientId = rpcParams.Receive.SenderClientId;
+        Debug.Log($"process click message from client id {clientId}");
+
         if (!NetworkManager.Singleton.IsConnectedClient)
         {
             Debug.Log("Not connected to a server");
@@ -89,18 +93,22 @@ public class GameManager : NetworkBehaviour
         if (type != GetCurrentPlayerType())
         {
             Debug.Log("Your turn " + type + " does not match current player " + GetCurrentPlayerType());
+            TriggerOnSoundToClient(SoundType.Error, clientId);
             return;
         }
 
         if (!boardGame.IsCellValid(x, y) || !boardGame.IsCellEmpty(x, y))
         {
             Debug.Log("Invalid cell " + y + ", " + x);
+            TriggerOnSoundToClient(SoundType.Error, clientId);
             return;
         }
 
         Debug.Log("Clicked on cell " + y + ", " + x);
         boardGame.SetCell(x, y, type);
         OnCellClicked?.Invoke(this, new OnCellClickedEventArgs(x, y, type));
+        TriggerOnSoundToAll(SoundType.Place);
+
 
         if (boardGame.IsBoardFull())
         {
@@ -253,5 +261,21 @@ public class GameManager : NetworkBehaviour
     private void TriggerOnGameRematchRpc()
     {
         OnGameRematch?.Invoke(this, EventArgs.Empty);
+    }
+
+    [Rpc(SendTo.SpecifiedInParams)]
+    private void TriggerOnSoundRpc(SoundType type, RpcParams rpcParams = default)
+    {
+        OnGameSound?.Invoke(this, new OnGameSoundArgs(type));
+    }
+
+    private void TriggerOnSoundToClient(SoundType type, ulong clientId)
+    {
+        TriggerOnSoundRpc(type, RpcTarget.Single(clientId, RpcTargetUse.Temp));
+    }
+
+    private void TriggerOnSoundToAll(SoundType type)
+    {
+        TriggerOnSoundRpc(type, RpcTarget.ClientsAndHost);
     }
 }

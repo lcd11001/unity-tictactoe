@@ -37,3 +37,20 @@ public class OnGameWinnerArgs : EventArgs
         Angle = angle;
     }
 }
+
+public enum SoundType
+{
+    Place,
+    Error,
+    Win,
+    Lose,
+}
+
+public class OnGameSoundArgs : EventArgs
+{
+    public SoundType SoundType { get; private set; }
+    public OnGameSoundArgs(SoundType soundType)
+    {
+        SoundType = soundType;
+    }
+}
