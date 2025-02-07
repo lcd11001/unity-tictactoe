@@ -141,6 +141,8 @@ public class GameManager : NetworkBehaviour
         if (IsServer)
         {
             localPlayerType = PlayerType.Cross;
+            playerCrossScore.Value = 0;
+            playerCircleScore.Value = 0;
 
             NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
         }
@@ -149,8 +151,6 @@ public class GameManager : NetworkBehaviour
             localPlayerType = PlayerType.Circle;
         }
 
-        playerCrossScore.Value = 0;
-        playerCircleScore.Value = 0;
 
         // register to the event for both server and client
         currentPlayerType.OnValueChanged += OnCurrentPlayerTypeValueChanged;
