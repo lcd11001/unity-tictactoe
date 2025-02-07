@@ -9,6 +9,12 @@ public class SoundManager : MonoBehaviour
     [SerializeField]
     private AudioSource sfxError;
 
+    [SerializeField]
+    private AudioSource sfxWin;
+
+    [SerializeField]
+    private AudioSource sfxLose;
+
     private void Start()
     {
         GameManager.Instance.OnGameSound += OnGameSound;
@@ -29,19 +35,37 @@ public class SoundManager : MonoBehaviour
             case SoundType.Error:
                 PlaySfxError();
                 break;
+            case SoundType.Win:
+                PlaySfxWin();
+                break;
+            case SoundType.Lose:
+                PlaySfxLose();
+                break;
         }
     }
 
 
     private void PlaySfxPlace()
     {
-        Debug.Log("PlaySfxPlaceRpc localID " + NetworkManager.Singleton.LocalClientId + " is server " + NetworkManager.Singleton.IsServer);
+        Debug.Log("PlaySfxPlace localID " + NetworkManager.Singleton.LocalClientId + " is server " + NetworkManager.Singleton.IsServer);
         sfxPlace.Play();
     }
 
-    public void PlaySfxError()
+    private void PlaySfxError()
     {
-        Debug.Log("PlaySfxErrorRpc localID " + NetworkManager.Singleton.LocalClientId + " is server " + NetworkManager.Singleton.IsServer);
+        Debug.Log("PlaySfxError localID " + NetworkManager.Singleton.LocalClientId + " is server " + NetworkManager.Singleton.IsServer);
         sfxError.Play();
+    }
+
+    private void PlaySfxWin()
+    {
+        Debug.Log("PlaySfxWin localID " + NetworkManager.Singleton.LocalClientId + " is server " + NetworkManager.Singleton.IsServer);
+        sfxWin.Play();
+    }
+
+    private void PlaySfxLose()
+    {
+        Debug.Log("PlaySfxLose localID " + NetworkManager.Singleton.LocalClientId + " is server " + NetworkManager.Singleton.IsServer);
+        sfxLose.Play();
     }
 }

@@ -107,7 +107,7 @@ public class GameManager : NetworkBehaviour
         Debug.Log("Clicked on cell " + y + ", " + x);
         boardGame.SetCell(x, y, type);
         OnCellClicked?.Invoke(this, new OnCellClickedEventArgs(x, y, type));
-        TriggerOnSoundToAll(SoundType.Place);
+        TriggerOnSoundToEveryone(SoundType.Place);
 
 
         if (boardGame.IsBoardFull())
@@ -123,6 +123,9 @@ public class GameManager : NetworkBehaviour
             Debug.Log("Winner " + type);
             //OnGameWinner?.Invoke(this, new OnGameWinnerArgs(type, boardGame.WinnerStart, boardGame.WinnerEnd));
             TriggerOnGameWinnerRpc(type, boardGame.WinnerStart, boardGame.WinnerEnd, boardGame.WinnerAngle);
+
+            TriggerOnSoundToClient(SoundType.Win, clientId);
+            TriggerOnSoundExceptClient(SoundType.Lose, clientId);
         }
         else
         {
@@ -274,8 +277,13 @@ public class GameManager : NetworkBehaviour
         TriggerOnSoundRpc(type, RpcTarget.Single(clientId, RpcTargetUse.Temp));
     }
 
-    private void TriggerOnSoundToAll(SoundType type)
+    private void TriggerOnSoundToEveryone(SoundType type)
     {
         TriggerOnSoundRpc(type, RpcTarget.ClientsAndHost);
+    }
+
+    private void TriggerOnSoundExceptClient(SoundType type, ulong clientId)
+    {
+        TriggerOnSoundRpc(type, RpcTarget.Not(clientId, RpcTargetUse.Temp));
     }
 }
