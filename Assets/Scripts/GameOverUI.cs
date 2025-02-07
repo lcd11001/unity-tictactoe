@@ -2,6 +2,10 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 
+#if UNITY_EDITOR
+using System.Reflection;
+#endif
+
 public class GameOverUI : MonoBehaviour
 {
     [SerializeField]
@@ -40,7 +44,25 @@ public class GameOverUI : MonoBehaviour
         youLose.SetActive(false);
         youDraw.SetActive(false);
         rematchButton.gameObject.SetActive(false);
+
+        // clear log messages from the console
+        Debug.ClearDeveloperConsole();
+
+#if UNITY_EDITOR
+        ClearLog();
+#endif
     }
+
+#if UNITY_EDITOR
+    // https://stackoverflow.com/questions/40577412/clear-editor-console-logs-from-script
+    private void ClearLog()
+    {
+        var assembly = Assembly.GetAssembly(typeof(UnityEditor.Editor));
+        var type = assembly.GetType("UnityEditor.LogEntries");
+        var method = type.GetMethod("Clear");
+        method.Invoke(new object(), null);
+    }
+#endif
 
     private void OnGameEnded(object sender, OnGameWinnerArgs e)
     {
