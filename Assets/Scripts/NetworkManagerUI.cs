@@ -16,15 +16,27 @@ public class NetworkManagerUI : MonoBehaviour
     [SerializeField]
     private GameObject waitingPannel;
 
+    [Space(20)]
     [SerializeField]
     private bool useRelay = false;
 
     [SerializeField]
     private string joinCode;
 
+    [Space(20)]
+    [SerializeField]
+    private bool useLobby = false;
+    [SerializeField]
+    private string lobbyId;
+
     void Awake()
     {
-        if (useRelay)
+        if (useLobby)
+        {
+            buttonHost.onClick.AddListener(OnLobbyHostClicked);
+            buttonClient.onClick.AddListener(OnLobbyClientClicked);
+        }
+        else if (useRelay)
         {
             buttonHost.onClick.AddListener(OnRelayHostClicked);
             buttonClient.onClick.AddListener(OnRelayClientClicked);
@@ -82,7 +94,7 @@ public class NetworkManagerUI : MonoBehaviour
     {
         HideButtons();
         ShowLoading();
-        joinCode = await RelayNetworkManagerSingleton.Instance.StartHostWithRelay();
+        joinCode = await RelayNetworkManagerSingleton.Instance.StartHostWithRelay(1);
         if (!string.IsNullOrEmpty(joinCode))
         {
             Debug.Log($"Join code: {joinCode}");
@@ -99,6 +111,38 @@ public class NetworkManagerUI : MonoBehaviour
         HideButtons();
         ShowLoading();
         bool success = await RelayNetworkManagerSingleton.Instance.StartClientWithRelay(joinCode);
+        if (success)
+        {
+            Debug.Log("Connected to host");
+            ShowWaiting();
+        }
+        else
+        {
+            Debug.LogError("Failed to connect to host");
+        }
+    }
+
+    private async void OnLobbyHostClicked()
+    {
+        HideButtons();
+        ShowLoading();
+        lobbyId = await RelayNetworkManagerSingleton.Instance.CreateLobbyAndStartHost(2);
+        if (!string.IsNullOrEmpty(lobbyId))
+        {
+            Debug.Log($"Lobby created: {lobbyId}");
+            ShowWaiting();
+        }
+        else
+        {
+            Debug.LogError("Failed to create lobby");
+        }
+    }
+
+    private async void OnLobbyClientClicked()
+    {
+        HideButtons();
+        ShowLoading();
+        bool success = await RelayNetworkManagerSingleton.Instance.QuickJoinRelayViaLobby();
         if (success)
         {
             Debug.Log("Connected to host");

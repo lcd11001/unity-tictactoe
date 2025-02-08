@@ -1002,6 +1002,8 @@ MonoBehaviour:
   waitingPannel: {fileID: 772565844}
   useRelay: 1
   joinCode: 
+  useLobby: 1
+  lobbyId: 
 --- !u!4 &447143740
 Transform:
   m_ObjectHideFlags: 0

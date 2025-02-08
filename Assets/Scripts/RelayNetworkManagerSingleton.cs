@@ -1,8 +1,12 @@
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using Unity.Services.Authentication;
 using Unity.Services.Core;
+using Unity.Services.Lobbies;
+using Unity.Services.Lobbies.Models;
 using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
 using UnityEngine;
@@ -29,12 +33,7 @@ public class RelayNetworkManagerSingleton : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Creates a relay server allocation and start a host
-    /// </summary>
-    /// <param name="maxConnections">The maximum amount of clients that can connect to the relay</param>
-    /// <returns>The join code</returns>
-    public async Task<string> StartHostWithRelay(int maxConnections = 5)
+    private async Task StartService()
     {
         //Initialize the Unity Services engine
         await UnityServices.InitializeAsync();
@@ -44,6 +43,16 @@ public class RelayNetworkManagerSingleton : MonoBehaviour
             //If not already logged, log the user in
             await AuthenticationService.Instance.SignInAnonymouslyAsync();
         }
+    }
+
+    /// <summary>
+    /// Creates a relay server allocation and start a host
+    /// </summary>
+    /// <param name="maxConnections">The maximum amount of clients that can connect to the relay</param>
+    /// <returns>The join code</returns>
+    public async Task<string> StartHostWithRelay(int maxConnections = 5)
+    {
+        await StartService();
 
         // Request allocation and join code
         Allocation allocation = await RelayService.Instance.CreateAllocationAsync(maxConnections);
@@ -61,14 +70,7 @@ public class RelayNetworkManagerSingleton : MonoBehaviour
     /// <returns>True if the connection was successful</returns>
     public async Task<bool> StartClientWithRelay(string joinCode)
     {
-        //Initialize the Unity Services engine
-        await UnityServices.InitializeAsync();
-        //Always authenticate your users beforehand
-        if (!AuthenticationService.Instance.IsSignedIn)
-        {
-            //If not already logged, log the user in
-            await AuthenticationService.Instance.SignInAnonymouslyAsync();
-        }
+        await StartService();
 
         // Join allocation
         var joinAllocation = await RelayService.Instance.JoinAllocationAsync(joinCode: joinCode);
@@ -76,5 +78,74 @@ public class RelayNetworkManagerSingleton : MonoBehaviour
         NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(AllocationUtils.ToRelayServerData(joinAllocation, "dtls"));
         // Start client
         return !string.IsNullOrEmpty(joinCode) && NetworkManager.Singleton.StartClient();
+    }
+
+    public async Task<string> CreateLobbyAndStartHost(int maxConnections = 5)
+    {
+        string joinCode = await StartHostWithRelay(maxConnections);
+
+        try
+        {
+            // Create lobby and add joinCode to lobby data
+            CreateLobbyOptions options = new CreateLobbyOptions
+            {
+                IsPrivate = false,
+                Data = new Dictionary<string, DataObject>
+            {
+                { "joinCode", new DataObject(DataObject.VisibilityOptions.Member, joinCode) }
+            }
+            };
+            // Generate a unique lobby name using UUID
+            string lobbyName = $"TicTacToe_{Guid.NewGuid()}";
+            Lobby lobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxConnections, options);
+            return lobby.Id;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError(e.Message);
+        }
+        return null;
+    }
+
+    public async Task<bool> QuickJoinRelayViaLobby()
+    {
+        await StartService();
+
+        QuickJoinLobbyOptions options = new QuickJoinLobbyOptions
+        {
+            Filter = new List<QueryFilter>
+            {
+                new QueryFilter(QueryFilter.FieldOptions.AvailableSlots, "0", QueryFilter.OpOptions.GT),
+            }
+        };
+
+        try
+        {
+            Lobby lobby = await LobbyService.Instance.QuickJoinLobbyAsync(options);
+
+            if (lobby != null && !string.IsNullOrEmpty(lobby.Id))
+            {
+                if (lobby.Data.TryGetValue("joinCode", out DataObject dataObject))
+                {
+                    string joinCode = dataObject.Value;
+                    // Use joinCode to join Relay
+                    return await RelayNetworkManagerSingleton.Instance.StartClientWithRelay(joinCode);
+                }
+                else
+                {
+                    Debug.LogError("Join code not found in lobby data.");
+                }
+            }
+            else
+            {
+                Debug.LogError("No lobbies found.");
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError(e.Message);
+        }
+
+        return false;
     }
 }
