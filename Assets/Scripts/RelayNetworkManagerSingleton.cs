@@ -82,7 +82,7 @@ public class RelayNetworkManagerSingleton : MonoBehaviour
 
     public async Task<string> CreateLobbyAndStartHost(int maxConnections = 5)
     {
-        string joinCode = await StartHostWithRelay(maxConnections);
+        joinCode = await StartHostWithRelay(maxConnections);
 
         try
         {
@@ -91,14 +91,17 @@ public class RelayNetworkManagerSingleton : MonoBehaviour
             {
                 IsPrivate = false,
                 Data = new Dictionary<string, DataObject>
-            {
-                { "joinCode", new DataObject(DataObject.VisibilityOptions.Member, joinCode) }
-            }
+                {
+                    { "joinCode", new DataObject(DataObject.VisibilityOptions.Member, joinCode) }
+                }
             };
             // Generate a unique lobby name using UUID
             string lobbyName = $"TicTacToe_{Guid.NewGuid()}";
             Lobby lobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxConnections, options);
-            return lobby.Id;
+            if (lobby != null)
+            {
+                return lobby.Id;
+            }
         }
         catch (Exception e)
         {
@@ -123,22 +126,15 @@ public class RelayNetworkManagerSingleton : MonoBehaviour
         {
             Lobby lobby = await LobbyService.Instance.QuickJoinLobbyAsync(options);
 
-            if (lobby != null && !string.IsNullOrEmpty(lobby.Id))
+            if (lobby != null && lobby.Data.TryGetValue("joinCode", out DataObject dataObject))
             {
-                if (lobby.Data.TryGetValue("joinCode", out DataObject dataObject))
-                {
-                    string joinCode = dataObject.Value;
-                    // Use joinCode to join Relay
-                    return await RelayNetworkManagerSingleton.Instance.StartClientWithRelay(joinCode);
-                }
-                else
-                {
-                    Debug.LogError("Join code not found in lobby data.");
-                }
+                joinCode = dataObject.Value;
+                // Use joinCode to join Relay
+                return await RelayNetworkManagerSingleton.Instance.StartClientWithRelay(joinCode);
             }
             else
             {
-                Debug.LogError("No lobbies found.");
+                Debug.LogError("Join code not found in lobby data.");
             }
         }
         catch (Exception e)
